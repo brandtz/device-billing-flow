@@ -9,6 +9,7 @@ import {
   User
 } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface NavigationProps {
   userRole?: 'customer' | 'admin';
@@ -17,6 +18,7 @@ interface NavigationProps {
 
 export const Navigation = ({ userRole = 'customer', onLogout }: NavigationProps) => {
   const [activeTab, setActiveTab] = useState('products');
+  const navigate = useNavigate();
 
   const customerTabs = [
     { id: 'products', label: 'Products', icon: ShoppingCart, path: '/products' },
@@ -27,6 +29,7 @@ export const Navigation = ({ userRole = 'customer', onLogout }: NavigationProps)
 
   const adminTabs = [
     { id: 'admin-products', label: 'Manage Products', icon: ShoppingCart, path: '/admin/products' },
+    { id: 'admin-rate-plans', label: 'Manage Rate Plans', icon: BarChart3, path: '/admin/rate-plans' },
     { id: 'admin-orders', label: 'All Orders', icon: Package, path: '/admin/orders' },
     { id: 'admin-accounts', label: 'Customer Accounts', icon: Users, path: '/admin/accounts' },
     { id: 'admin-settings', label: 'System Settings', icon: Settings, path: '/admin/settings' },
@@ -51,7 +54,10 @@ export const Navigation = ({ userRole = 'customer', onLogout }: NavigationProps)
                     key={tab.id}
                     variant={activeTab === tab.id ? "default" : "ghost"}
                     className="flex items-center gap-2"
-                    onClick={() => setActiveTab(tab.id)}
+                    onClick={() => {
+                      setActiveTab(tab.id);
+                      navigate(tab.path);
+                    }}
                   >
                     <Icon className="h-4 w-4" />
                     {tab.label}

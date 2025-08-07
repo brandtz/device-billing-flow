@@ -1,14 +1,14 @@
 export interface Product {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   category: 'phone' | 'tablet' | 'hotspot' | 'iot';
   price: number;
+  monthly_cost?: number;
   image_url?: string;
-  is_active: boolean;
-  specifications: Record<string, any>;
+  features?: string[];
+  active: boolean;
   created_at: string;
-  updated_at: string;
 }
 
 export interface RatePlan {

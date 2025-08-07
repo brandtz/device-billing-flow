@@ -9,15 +9,19 @@ import { Products } from "./pages/Products";
 import { Orders } from "./pages/Orders";
 import { Subscribers } from "./pages/Subscribers";
 import { Billing } from "./pages/Billing";
+import { ManageProducts } from "./pages/admin/ManageProducts";
+import { ManageRatePlans } from "./pages/admin/ManageRatePlans";
 import NotFound from "./pages/NotFound";
 import { useAuth } from "./hooks/useAuth";
+import { useUserRole } from "./hooks/useUserRole";
 
 const queryClient = new QueryClient();
 
 const App = () => {
   const { user, loading, signIn, signUp, signOut } = useAuth();
+  const { userRole, loading: roleLoading } = useUserRole(user);
 
-  if (loading) {
+  if (loading || roleLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
@@ -47,7 +51,7 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <div className="min-h-screen bg-background">
-            <Navigation userRole="customer" onLogout={signOut} />
+            <Navigation userRole={userRole} onLogout={signOut} />
             <main>
               <Routes>
                 <Route path="/" element={<Products />} />
@@ -55,6 +59,8 @@ const App = () => {
                 <Route path="/orders" element={<Orders />} />
                 <Route path="/subscribers" element={<Subscribers />} />
                 <Route path="/billing" element={<Billing />} />
+                <Route path="/admin/products" element={<ManageProducts />} />
+                <Route path="/admin/rate-plans" element={<ManageRatePlans />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
