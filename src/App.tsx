@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,33 +10,23 @@ import { Orders } from "./pages/Orders";
 import { Subscribers } from "./pages/Subscribers";
 import { Billing } from "./pages/Billing";
 import NotFound from "./pages/NotFound";
+import { useAuth } from "./hooks/useAuth";
 
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [user, setUser] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const { user, loading, signIn, signUp, signOut } = useAuth();
 
-  // Mock authentication functions - will be replaced with Supabase auth
-  const handleLogin = async (email: string, password: string) => {
-    setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setUser({ id: '1', email, role: 'customer' });
-    setIsLoading(false);
-  };
-
-  const handleRegister = async (email: string, password: string) => {
-    setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setUser({ id: '1', email, role: 'customer' });
-    setIsLoading(false);
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
@@ -45,7 +34,7 @@ const App = () => {
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          <LoginForm onLogin={handleLogin} onRegister={handleRegister} />
+          <LoginForm onLogin={signIn} onRegister={signUp} />
         </TooltipProvider>
       </QueryClientProvider>
     );
@@ -58,7 +47,7 @@ const App = () => {
         <Sonner />
         <BrowserRouter>
           <div className="min-h-screen bg-background">
-            <Navigation userRole={user.role} onLogout={handleLogout} />
+            <Navigation userRole="customer" onLogout={signOut} />
             <main>
               <Routes>
                 <Route path="/" element={<Products />} />

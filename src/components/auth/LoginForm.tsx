@@ -7,8 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 
 interface LoginFormProps {
-  onLogin: (email: string, password: string) => Promise<void>;
-  onRegister: (email: string, password: string) => Promise<void>;
+  onLogin: (email: string, password: string) => Promise<{ error: any }>;
+  onRegister: (email: string, password: string) => Promise<{ error: any }>;
 }
 
 export const LoginForm = ({ onLogin, onRegister }: LoginFormProps) => {
