@@ -20,9 +20,9 @@ export const Products = () => {
   const fetchData = async () => {
     try {
       const [productsRes, ratePlansRes, featuresRes] = await Promise.all([
-        supabase.from('products').select('*').eq('active', true),
-        supabase.from('rate_plans').select('*').eq('is_active', true),
-        supabase.from('features').select('*').eq('is_active', true)
+        (supabase as any).from('products').select('*').eq('active', true),
+        (supabase as any).from('rate_plans').select('*').eq('active', true),
+        (supabase as any).from('features').select('*')
       ]);
 
       if (productsRes.error) throw productsRes.error;

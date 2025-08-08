@@ -37,7 +37,7 @@ export const ManageProducts = () => {
 
   const fetchProducts = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('products')
         .select('*')
         .order('created_at', { ascending: false });
@@ -101,14 +101,14 @@ export const ManageProducts = () => {
 
     try {
       if (editingProduct) {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('products')
           .update(productData)
           .eq('id', editingProduct.id);
         if (error) throw error;
         toast({ title: "Success", description: "Product updated successfully" });
       } else {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('products')
           .insert(productData);
         if (error) throw error;
@@ -131,7 +131,7 @@ export const ManageProducts = () => {
 
   const toggleProductVisibility = async (product: Product) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('products')
         .update({ active: !product.active })
         .eq('id', product.id);
@@ -155,7 +155,7 @@ export const ManageProducts = () => {
     if (!confirm("Are you sure you want to delete this product?")) return;
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('products')
         .delete()
         .eq('id', productId);

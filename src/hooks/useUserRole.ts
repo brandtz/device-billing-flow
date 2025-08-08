@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
 import { User } from '@supabase/supabase-js'
 import { supabase } from '@/integrations/supabase/client'
+import { Database } from '@/types/database'
+
+type SupabaseClient = typeof supabase
 
 export function useUserRole(user: User | null) {
   const [userRole, setUserRole] = useState<'customer' | 'admin'>('customer')
@@ -15,11 +18,11 @@ export function useUserRole(user: User | null) {
       }
 
       try {
-        const { data, error } = await supabase
+        const { data, error } = await (supabase as any)
           .from('profiles')
           .select('role')
           .eq('id', user.id)
-          .single()
+          .maybeSingle()
 
         if (error) {
           console.error('Error fetching user role:', error)

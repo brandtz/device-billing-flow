@@ -44,7 +44,7 @@ export const ManageRatePlans = () => {
 
   const fetchRatePlans = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('rate_plans')
         .select('*')
         .order('created_at', { ascending: false });
@@ -102,14 +102,14 @@ export const ManageRatePlans = () => {
 
     try {
       if (editingPlan) {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('rate_plans')
           .update(planData)
           .eq('id', editingPlan.id);
         if (error) throw error;
         toast({ title: "Success", description: "Rate plan updated successfully" });
       } else {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('rate_plans')
           .insert(planData);
         if (error) throw error;
@@ -132,7 +132,7 @@ export const ManageRatePlans = () => {
 
   const togglePlanVisibility = async (plan: RatePlan) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('rate_plans')
         .update({ active: !plan.active })
         .eq('id', plan.id);
@@ -156,7 +156,7 @@ export const ManageRatePlans = () => {
     if (!confirm("Are you sure you want to delete this rate plan?")) return;
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('rate_plans')
         .delete()
         .eq('id', planId);
