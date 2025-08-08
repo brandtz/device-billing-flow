@@ -22,8 +22,15 @@ export const LoginForm = ({ onLogin, onRegister }: LoginFormProps) => {
     setIsLoading(true);
     
     try {
-      await onLogin(loginData.email, loginData.password);
-      toast({ title: "Welcome back!", description: "You have successfully logged in." });
+      const { error } = await onLogin(loginData.email, loginData.password);
+      if (error) {
+        toast({ 
+          title: "Login failed", 
+          description: error.message || "Please check your credentials and try again.",
+          variant: "destructive"
+        });
+      }
+      // Don't show success toast here - let the auth state change handle the redirect
     } catch (error) {
       toast({ 
         title: "Login failed", 
@@ -50,8 +57,19 @@ export const LoginForm = ({ onLogin, onRegister }: LoginFormProps) => {
     setIsLoading(true);
     
     try {
-      await onRegister(registerData.email, registerData.password);
-      toast({ title: "Account created!", description: "Welcome to CarrierCorp Portal." });
+      const { error } = await onRegister(registerData.email, registerData.password);
+      if (error) {
+        toast({ 
+          title: "Registration failed", 
+          description: error.message || "Please try again with different credentials.",
+          variant: "destructive"
+        });
+      } else {
+        toast({ 
+          title: "Account created!", 
+          description: "Please check your email to confirm your account."
+        });
+      }
     } catch (error) {
       toast({ 
         title: "Registration failed", 

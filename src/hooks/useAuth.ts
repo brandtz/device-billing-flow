@@ -18,9 +18,17 @@ export function useAuth() {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
       setUser(session?.user ?? null)
       setLoading(false)
+      
+      // Show welcome toast when user signs in
+      if (event === 'SIGNED_IN' && session?.user) {
+        toast({
+          title: "Welcome back!",
+          description: "You have successfully logged in.",
+        })
+      }
     })
 
     return () => subscription.unsubscribe()
