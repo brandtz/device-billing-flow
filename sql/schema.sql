@@ -170,14 +170,65 @@ CREATE TRIGGER on_auth_user_created
   FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 -- Sample data
-INSERT INTO products (name, description, category, price, monthly_cost, features) VALUES
-('iPhone 15 Pro', 'Latest iPhone with advanced features', 'phone', 999.99, 0, '["Face ID", "5G", "Pro Camera System"]'),
-('Samsung Galaxy Tab S9', 'Premium Android tablet', 'tablet', 799.99, 0, '["11-inch Display", "S Pen", "5G Ready"]'),
-('Verizon Jetpack MiFi', 'Portable 5G hotspot device', 'hotspot', 199.99, 0, '["5G Connectivity", "Up to 15 devices", "Long battery life"]'),
-('IoT Sensor Module', 'Industrial IoT tracking device', 'iot', 99.99, 15.00, '["GPS Tracking", "Temperature Sensor", "Low Power"]');
+INSERT INTO products (name, description, category, price, monthly_cost, features, sku) VALUES
+('iPhone 15 Pro', 'Latest iPhone with advanced features', 'phone', 999.99, 0, '["Face ID", "5G", "Pro Camera System"]', 'IPHONE15PRO-128'),
+('Samsung Galaxy Tab S9', 'Premium Android tablet', 'tablet', 799.99, 0, '["11-inch Display", "S Pen", "5G Ready"]', 'GALAXY-TAB-S9'),
+('Verizon Jetpack MiFi', 'Portable 5G hotspot device', 'hotspot', 199.99, 0, '["5G Connectivity", "Up to 15 devices", "Long battery life"]', 'JETPACK-MIFI-5G'),
+('IoT Sensor Module', 'Industrial IoT tracking device', 'iot', 99.99, 15.00, '["GPS Tracking", "Temperature Sensor", "Low Power"]', 'IOT-SENSOR-PRO');
 
-INSERT INTO rate_plans (name, description, monthly_cost, data_limit, features) VALUES
-('Unlimited Plus', 'Unlimited data with premium features', 85.00, 'Unlimited', '["5G Ultra Wideband", "Mobile Hotspot", "International Roaming"]'),
-('Basic Plan', 'Essential connectivity plan', 35.00, '5GB', '["4G LTE", "Mobile Hotspot (2GB)"]'),
-('Business Unlimited', 'Enterprise unlimited plan', 120.00, 'Unlimited', '["Priority Data", "Advanced Security", "Management Tools"]'),
-('IoT Data Plan', 'Optimized for IoT devices', 10.00, '1GB', '["Low Latency", "Device Management", "API Access"]');
+INSERT INTO rate_plans (name, description, monthly_cost, data_limit, features, soc) VALUES
+('Unlimited Plus', 'Unlimited data with premium features', 85.00, 'Unlimited', '["5G Ultra Wideband", "Mobile Hotspot", "International Roaming"]', 'UNL-PLUS-001'),
+('Basic Plan', 'Essential connectivity plan', 35.00, '5GB', '["4G LTE", "Mobile Hotspot (2GB)"]', 'BASIC-5GB-001'),
+('Business Unlimited', 'Enterprise unlimited plan', 120.00, 'Unlimited', '["Priority Data", "Advanced Security", "Management Tools"]', 'BIZ-UNL-001'),
+('IoT Data Plan', 'Optimized for IoT devices', 10.00, '1GB', '["Low Latency", "Device Management", "API Access"]', 'IOT-DATA-001');
+
+-- Add new columns to existing tables for backend integration attributes
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS sku TEXT;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS external_product_id TEXT;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS api_mapping JSONB;
+
+-- Update rate_plans table  
+ALTER TABLE public.rate_plans ADD COLUMN IF NOT EXISTS soc TEXT;
+ALTER TABLE public.rate_plans ADD COLUMN IF NOT EXISTS external_plan_id TEXT;
+ALTER TABLE public.rate_plans ADD COLUMN IF NOT EXISTS api_mapping JSONB;
+
+-- Create pricing_options table
+CREATE TABLE IF NOT EXISTS public.pricing_options (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  product_id UUID REFERENCES public.products(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL CHECK (type IN ('financed', 'full_payment')),
+  down_payment INTEGER NOT NULL DEFAULT 0,
+  monthly_payment INTEGER DEFAULT 0,
+  term_months INTEGER,
+  total_cost INTEGER NOT NULL,
+  is_default BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Enable RLS for pricing_options
+ALTER TABLE public.pricing_options ENABLE ROW LEVEL SECURITY;
+
+-- Create policies for pricing_options
+CREATE POLICY "select_pricing_options" ON public.pricing_options FOR SELECT USING (true);
+
+-- Create addresses table for checkout
+CREATE TABLE IF NOT EXISTS public.addresses (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  order_id UUID REFERENCES public.orders(id) ON DELETE CASCADE,
+  type TEXT NOT NULL CHECK (type IN ('shipping', 'billing', 'ppu', 'e911')),
+  street_address TEXT NOT NULL,
+  street_address_2 TEXT,
+  city TEXT NOT NULL,
+  state TEXT NOT NULL,
+  zip_code TEXT NOT NULL,
+  country TEXT NOT NULL DEFAULT 'US',
+  is_default BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- Enable RLS for addresses
+ALTER TABLE public.addresses ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "select_own_addresses" ON public.addresses FOR SELECT USING (user_id = auth.uid());

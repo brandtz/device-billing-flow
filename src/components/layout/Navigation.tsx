@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { CartDrawer } from "@/components/cart/CartDrawer";
 
 interface NavigationProps {
   userRole?: 'customer' | 'admin';
@@ -68,6 +69,7 @@ export const Navigation = ({ userRole = 'customer', onLogout }: NavigationProps)
           </div>
 
           <div className="flex items-center space-x-4">
+            <CartDrawer />
             <Button variant="ghost" className="flex items-center gap-2">
               <User className="h-4 w-4" />
               Profile
